@@ -19,9 +19,9 @@ timm>=1.0.9
 safetensors>=0.4.5
 
 # ── H100 / BF16 performance ───────────────────────────────────────────────────
-# Flash-Attention 2: build with CUDA extensions.
-# Install with: pip install flash-attn --no-build-isolation
-flash-attn>=2.6.0
+# Prebuilt flash-attn wheel (avoids cross-device link build errors).
+# Matches: CUDA 12.x, PyTorch 2.8, Python 3.12, cxx11abi=TRUE
+https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.3/flash_attn-2.8.3+cu12torch2.8cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
 ninja>=1.11.1
 
 # ── Utilities ────────────────────────────────────────────────────────────────

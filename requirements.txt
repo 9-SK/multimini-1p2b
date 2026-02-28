@@ -1,0 +1,30 @@
+# ── Core ──────────────────────────────────────────────────────────────────────
+torch>=2.4.0
+torchaudio>=2.4.0
+torchvision>=0.19.0
+transformers>=4.48.0
+accelerate>=1.1.0
+deepspeed>=0.15.0
+
+# ── Data ──────────────────────────────────────────────────────────────────────
+datasets>=3.0.0
+huggingface-hub>=0.26.0
+sentencepiece>=0.2.0
+soundfile>=0.12.1
+librosa>=0.10.2
+Pillow>=10.3.0
+
+# ── Model extras ──────────────────────────────────────────────────────────────
+timm>=1.0.9
+safetensors>=0.4.5
+
+# ── H100 / BF16 performance ───────────────────────────────────────────────────
+# Flash-Attention 2: build with CUDA extensions.
+# Install with: pip install flash-attn --no-build-isolation
+flash-attn>=2.6.0
+ninja>=1.11.1
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+PyYAML>=6.0.2
+tqdm>=4.67.0
+packaging>=24.0

@@ -1,0 +1,95 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# MultiMini 1.2B – H100 BF16
+# Trainable (non-embedding) parameters: ~1.22B
+# ──────────────────────────────────────────────────────────────────────────────
+model:
+  vocab_size: 64000
+  hidden_size: 2048
+  intermediate_size: 8192
+  num_hidden_layers: 22            # 22 × ~55M params/layer  ≈ 1.2B total
+  num_attention_heads: 16
+  num_key_value_heads: 8           # GQA – halves KV-cache footprint
+  max_position_embeddings: 8192
+  rope_theta: 500000.0             # Llama-3 style long-context RoPE
+  rms_norm_eps: 1.0e-5
+  tie_word_embeddings: true
+  use_cache: false
+  gradient_checkpointing: true
+  use_flash_attention: true        # Flash-Attention 2 via attn_implementation
+
+modal:
+  vision_backbone: google/siglip-so400m-patch14-384
+  audio_backbone: openai/whisper-large-v3    # 1280-dim feature space
+  audio_codec: facebook/encodec_24khz
+  modal_hidden_size: 1280
+  projector_hidden_size: 4096
+  projector_depth: 3
+  freeze_vision_backbone: true
+  freeze_audio_backbone: true
+  freeze_audio_codec: true
+
+training:
+  seed: 2026
+  precision: bf16
+  cuda_only: true
+  # Optimiser
+  learning_rate: 1.5e-4
+  min_lr: 1.5e-5
+  weight_decay: 0.1
+  betas: [0.9, 0.95]
+  eps: 1.0e-8
+  # LR schedule
+  lr_scheduler: cosine
+  warmup_steps: 2000
+  max_steps: 500000
+  # Batch – tuned for H100 80 GB SXM5
+  # effective batch = 8 × 8 × n_gpus (e.g. 512 on 8 × H100)
+  batch_size_per_gpu: 8
+  grad_accum_steps: 8
+  max_grad_norm: 1.0
+  max_text_len: 4096         # collator max sequence length
+  # DataLoader
+  num_workers: 8
+  prefetch_factor: 4
+  # Checkpoints / logs
+  save_every: 2000
+  log_every: 10
+  output_dir: checkpoints/multimini-1p2b
+  resume_from: ""
+
+# ── Multi-manifest mixing (used when --manifest is NOT passed) ─────────────
+# Paths are relative to the repo root; adjust to your data location.
+manifests:
+  - data/chat_reasoning.jsonl
+  - data/code_reasoning.jsonl
+  - data/math_reasoning.jsonl
+  - data/asr_train.jsonl
+  - data/tts_train.jsonl
+  - data/image_caption_train.jsonl
+  - data/a2a_train.jsonl
+
+# Per-manifest sampling weights (unnormalised; normalised at runtime)
+task_weights:
+  chat:  3.0
+  code:  2.5
+  math:  2.0
+  asr:   1.5
+  tts:   1.0
+  image: 1.0
+  a2a:   0.5
+
+special_tokens:
+  think_start:    "<|think|>"
+  think_end:      "<|/think|>"
+  image_start:    "<|image|>"
+  audio_in_start: "<|audio_in|>"
+  audio_out_start:"<|audio_out|>"
+  text_start:     "<|text|>"
+  task_asr:       "<|task_asr|>"
+  task_tts:       "<|task_tts|>"
+  task_a2a:       "<|task_a2a|>"
+  task_i2t:       "<|task_i2t|>"
+  task_i2a:       "<|task_i2a|>"
+  task_chat:      "<|task_chat|>"
+  task_code:      "<|task_code|>"
+  task_math:      "<|task_math|>"
